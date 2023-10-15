@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+
+    <style>
+        .game {
+            display: grid;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tic-tac-toe {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .tic-tac-toe-cell {
+            display: flex;
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+
+        .tic-tac-toe-cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        .x {
+            color: #E74C3C;
+        }
+
+        .o {
+            color: #3498DB;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game" hx-ext="sse" sse-connect="/tictactoe?gameID={{ $.GameID }}">
+        <h1>Tic Tac Toe</h1>
+        <div class="tic-tac-toe">
+            {{ range $x, $row := .Grid }}
+            {{ range $y, $_ := $row }}
+            <form class="tic-tac-toe-cell" hx-post="/tictactoe?gameID={{ $.GameID }}" hx-params="*" hx-trigger="click"
+                hx-target="#cell{{ $x }}{{ $y }}" hx-swap="innerHTML">
+
+                <input type="hidden" id="x" name="x" value="{{ $x }}">
+                <input type="hidden" id="y" name="y" value="{{ $y }}">
+
+                <div id="cell{{ $x }}{{ $y }}" sse-swap="event{{ $x }}{{ $y }}">{{ GetPiece $x $y }}</div>
+            </form>
+            {{ end }}
+            {{ end }}
+
+        </div>
+
+        <h1 id="turnNotifier" sse-swap="eventTurnNotifier" hx-target="#turnNotifier" hx-swap="innerHTML">
+            not your turn!
+        </h1>
+
+        <h1 id="gameOver" sse-swap="eventGameOver" hx-target="#gameOver" hx-swap="innerHTML">
+            game is in progress!
+        </h1>
+
+        <h1 id="errorMessage" sse-swap="eventError" hx-target="#errorMessage" hx-swap="innerHTML"></h1>
+    </div>
+
+</body>
+
+</html>
